@@ -1,6 +1,61 @@
 # Edge AI for Healthcare
 ***Experimental and Research Use only***
 
+## Mindmap
+```mermaid
+mindmap
+root((Grant Opportunities for Medical Device Innovations))
+    ARPA-H
+      Health Science Futures
+        Continuous Biometric Monitoring
+        Advanced Medical Imaging
+
+      Scalable Solutions
+        Point-of-Care Diagnostics
+        Smart Drug Delivery Systems
+
+      Proactive Health
+        Continuous Biometric Monitoring
+        Smart Drug Delivery Systems
+
+      Resilient Systems
+        Surgical Guidance Systems
+
+    MTEC 
+      Combat Casualty Care
+        Smart Drug Delivery Systems
+        Continuous Biometric Monitoring
+
+      Infection Prevention
+        Ingestible/Implantable Sensors
+        Point-of-Care Diagnostics
+      Military-Civilian Dual Use
+        Surgical Guidance Systems
+        Rehabilitation & Assistive Tech
+
+    NSF
+      Smart Health Technologies
+        Continuous Biometric Monitoring
+        Advanced Medical Imaging
+      Sustainable Devices
+        Point-of-Care Diagnostics
+        Rehabilitation & Assistive Tech
+      Training & Workforce Development
+        Rehabilitation & Assistive Tech
+    NIH
+      Translational MedTech (Blueprint MedTech)
+        Continuous Biometric Monitoring
+        Ingestible/Implantable Sensors
+
+      Health Equity Focus Areas 
+        Point-of-Care Diagnostics 
+        Advanced Medical Imaging 
+
+      Neurological Disorders (Neurotech)
+        Smart Drug Delivery Systems 
+        Rehabilitation & Assistive Tech 
+```
+
 ## Platform Design
 ```mermaid
 flowchart
