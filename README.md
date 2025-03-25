@@ -104,6 +104,46 @@ subgraph Healthcare Edge Computing Network
 end
 ```
 
+## Sequence Diagram: Healthcare Edge Computing Network Data Flow
+
+```mermaid
+sequenceDiagram
+    participant PMD as Patient Monitoring Devices
+    participant RDD as Remote Diagnostic Devices
+    participant HDS as health.data.stream
+    participant AIR as AI Inference Router
+    participant AIM as AI Models
+    participant PHD as Patient Health DB
+    participant RDB as De-identified Research DB
+    participant RR as Research Repository
+    participant ACL as API Access Control Layer
+    participant HP as Healthcare Providers
+    participant RA as Research Access
+
+    PMD ->> HDS: Real-time patient data
+    RDD ->> HDS: Real-time diagnostic data
+    
+    HDS ->> AIR: Process incoming data
+    
+    AIR ->> AIM: Route data to appropriate AI models
+    AIM -->> AIR: Return analysis results
+    
+    AIR ->> PHD: Store data with retention policy
+    
+    PHD ->> RDB: De-identify & transform data
+    RDB ->> RR: Secure transfer of anonymized data
+    
+    PHD ->> ACL: Provide protected data
+    AIR ->> ACL: Provide controlled access
+    
+    ACL ->> HP: Authenticate & authorize access (TLS 1.3)
+    HP -->> ACL: Request patient data/analysis
+    ACL -->> HP: Return authorized data
+    
+    RR ->> RA: Provide anonymized data for research
+    RA -->> RR: Request research datasets
+```
+
 ## Implementation
 
 Incremental R&D approach:
@@ -127,4 +167,3 @@ Incremental R&D approach:
 │   ├── edgeai-icp-mil-tech-si.md # Edge AI Inter Cranial Pressure Monitoring System Technical Strategy
 │   └── icp-proposal-arch.md # Edge AI Inter Cranial Pressure Monitoring System Proposal Architecture
 └── README.md
-```
