@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeAI Medical Technology Knowledge Graph</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Interactive visualization of AI-enabled medical device technologies and innovation opportunities in healthcare">
+    <meta name="keywords" content="AI healthcare, medical technology, edge computing, wearable monitoring, healthcare innovation, medical devices">
+    <meta name="author" content="Jedi Labs + DesignPlex">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://health.edge.ai.labs.jedi-ops.dev/knowledge-graph">
+    <meta property="og:title" content="EdgeAI Medical Technology Knowledge Graph">
+    <meta property="og:description" content="Interactive visualization of AI-enabled medical device technologies and innovation opportunities in healthcare">
+    <meta property="og:image" content="https://health.edge.ai.labs.jedi-ops.dev/images/graph-preview.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://health.edge.ai.labs.jedi-ops.dev/knowledge-graph">
+    <meta property="twitter:title" content="EdgeAI Medical Technology Knowledge Graph">
+    <meta property="twitter:description" content="Interactive visualization of AI-enabled medical device technologies and innovation opportunities in healthcare">
+    <meta property="twitter:image" content="https://health.edge.ai.labs.jedi-ops.dev/images/graph-preview.jpg">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #7000ff;
+            --accent: #ff00aa;
+            --dark: #12171f;
+            --text: #e0e7ff;
+            --glow: 0 0 10px var(--primary), 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--primary);
+            box-shadow: var(--glow);
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+        
+        h1 span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+        
+        .visualization {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .link {
+            stroke-opacity: 0.5;
+            transition: stroke-opacity 0.3s;
+        }
+        
+        .link:hover {
+            stroke-opacity: 0.8;
+        }
+        
+        .node text {
+            fill: var(--text);
+            font-size: 10px;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+        }
+        
+        .cluster-node {
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.7));
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 300px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 1rem;
+            box-shadow: var(--glow);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+            max-width: calc(100% - 2rem);
+        }
+        
+        .info-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .info-panel-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            color: var(--primary);
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .info-title {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            padding-bottom: 0.5rem;
+            padding-right: 20px;
+        }
+        
+        .info-content {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .info-content p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-content strong {
+            color: var(--primary);
+        }
+        
+        .legend {
+            position: absolute;
+            left: 1rem;
+            bottom: 1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            box-shadow: var(--glow);
+            z-index: 100;
+            max-width: calc(100% - 2rem);
+            overflow-y: auto;
+            max-height: 40vh;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+        
+        .pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.05) 0%, transparent 60%);
+            opacity: 0.5;
+            animation: pulse 8s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.2; }
+        }
+        
+        .grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+        }
+        
+        .control-panel {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+        
+        .control-btn {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            box-shadow: var(--glow);
+        }
+        
+        .control-btn:hover {
+            background-color: rgba(0, 212, 255, 0.2);
+        }
+
+        .hover-glow {
+            transition: all 0.3s;
+        }
+        
+        .hover-glow:hover {
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Edge<span>AI</span> Medical Technology Knowledge Graph</h1>
+        <div class="subtitle">Visualizing the ecosystem of AI-driven healthcare innovations</div>
+    </header>
+    
+    <div class="visualization">
+        <div class="grid"></div>
+        <div class="pulse"></div>
+    </div>
+    
+    <div class="info-panel">
+        <button class="info-panel-close">&times;</button>
+        <div class="info-title">Select a node to see details</div>
+        <div class="info-content">
+            Click on any node in the graph to view detailed information about that opportunity or technology cluster.
+        </div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-title">Technology Clusters</div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF5733;"></div>
+            <div>Wearable Monitoring (A)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #33FF57;"></div>
+            <div>Portable Imaging (B)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #3357FF;"></div>
+            <div>Adaptive Therapeutics (C)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #F033FF;"></div>
+            <div>Point-of-Care Diagnostics (D)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF33F0;"></div>
+            <div>Surgical Assistance (E)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FFBD33;"></div>
+            <div>Rehabilitation Systems (F)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #33FFF0;"></div>
+            <div>Smart Implantables (G)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #BD33FF;"></div>
+            <div>Neurological Assessment (H)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FFFFFF;"></div>
+            <div>Uncategorized</div>
+        </div>
+    </div>
+    
+    <div class="control-panel">
+        <button class="control-btn" id="reset-zoom">Reset View</button>
+        <button class="control-btn" id="toggle-layout">Reorganize</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script>
+        // Add metadata for SEO and organizational purposes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add attribution in console
+            console.log('EdgeAI Medical Technology Knowledge Graph by Jedi Labs + DesignPlex');
+            console.log('© 2025 All Rights Reserved');
+        });
+        
+        // Define data
+        const clusterNames = {
+            "Cluster A": { name: "Wearable Monitoring", color: "#FF5733", id: "cluster-a" },
+            "Cluster B": { name: "Portable Imaging", color: "#33FF57", id: "cluster-b" },
+            "Cluster C": { name: "Adaptive Therapeutics", color: "#3357FF", id: "cluster-c" },
+            "Cluster D": { name: "Point-of-Care Diagnostics", color: "#F033FF", id: "cluster-d" },
+            "Cluster E": { name: "Surgical Assistance", color: "#FF33F0", id: "cluster-e" },
+            "Cluster F": { name: "Rehabilitation Systems", color: "#FFBD33", id: "cluster-f" },
+            "Cluster G": { name: "Smart Implantables", color: "#33FFF0", id: "cluster-g" },
+            "Cluster H": { name: "Neurological Assessment", color: "#BD33FF", id: "cluster-h" }
+        };
+        
+        const data = {
+            nodes: [],
+            links: []
+        };
+        
+        // Add cluster nodes
+        Object.entries(clusterNames).forEach(([key, value]) => {
+            data.nodes.push({
+                id: value.id,
+                name: value.name,
+                type: "cluster",
+                color: value.color,
+                value: 20,
+                description: `Platform technology for ${value.name.toLowerCase()} applications`,
+                market: "Multi-billion dollar opportunity across multiple segments"
+            });
+        });
+        
+        // Add opportunity nodes and links to clusters
+        const opportunities = [
+            {
+                id: 1,
+                name: "Ultrasound Accessibility in Rural Settings",
+                problem: "Inconsistent quality in ultrasound imaging in underserved areas",
+                solution: "AI-guided portable ultrasound with real-time feedback for non-specialists",
+                tam: "$9,320 M",
+                clusterNames: ["Cluster B"]
+            },
+            {
+                id: 2,
+                name: "Diabetic Retinopathy Early Detection",
+                problem: "Delayed diagnosis leading to preventable vision loss",
+                solution: "Compact, affordable retinal imaging with integrated AI for immediate screening",
+                tam: "$482 M",
+                clusterNames: ["Cluster B"]
+            },
+            {
+                id: 3,
+                name: "Stroke Triage Optimization",
+                problem: "Inefficient triage of stroke patients for appropriate interventions",
+                solution: "Portable EEG with AI analysis to differentiate stroke types before imaging",
+                tam: "$3,840 M",
+                clusterNames: ["Cluster D"]
+            },
+            {
+                id: 4,
+                name: "Early Sepsis Detection",
+                problem: "Delayed detection of sepsis in hospitalized patients",
+                solution: "Wearable multi-sensor with AI monitoring that integrates vitals and biomarkers",
+                tam: "$1,200 M",
+                clusterNames: ["Cluster A"]
+            },
+            {
+                id: 5,
+                name: "Parkinson's Disease Progression Monitoring",
+                problem: "Inconsistent monitoring of disease progression",
+                solution: "Wearable sensors with AI analysis quantifying motor symptoms in real-world",
+                tam: "$5,260 M",
+                clusterNames: ["Cluster A"]
+            },
+            {
+                id: 6,
+                name: "Epilepsy Management System",
+                problem: "Difficult management of treatment-resistant epilepsy",
+                solution: "Wearable EEG with AI seizure prediction and automated medication delivery",
+                tam: "$750 M",
+                clusterNames: ["Cluster A", "Cluster C"]
+            },
+            {
+                id: 7,
+                name: "Smart Medication Adherence System",
+                problem: "Suboptimal adherence in patients with complex medication regimens",
+                solution: "Smart dispenser with cameras and sensors verifying correct medication intake",
+                tam: "$2,510 M",
+                clusterNames: []
+            },
+            {
+                id: 8,
+                name: "Advanced Wound Care Management",
+                problem: "Inefficient wound care monitoring and treatment adjustment",
+                solution: "Smartphone attachment with sensors analyzing wound characteristics",
+                tam: "$413 M",
+                clusterNames: []
+            },
+            {
+                id: 9,
+                name: "Remote Pulmonary Function Assessment",
+                problem: "Limited access to pulmonary function testing",
+                solution: "Portable spirometer with AI providing clinical-grade assessment",
+                tam: "$1,100 M",
+                clusterNames: ["Cluster D"]
+            },
+            {
+                id: 10,
+                name: "Home-Based Sleep Apnea Diagnosis",
+                problem: "Delayed diagnosis of sleep apnea",
+                solution: "Non-invasive wearable sleep monitoring system with AI diagnostics",
+                tam: "$2,180 M",
+                clusterNames: ["Cluster D"]
+            },
+            {
+                id: 11,
+                name: "Advanced Fetal Monitoring",
+                problem: "Subjective assessment of fetal wellbeing during labor",
+                solution: "Fetal monitor with AI interpretation predicting distress with higher accuracy",
+                tam: "$3,760 M",
+                clusterNames: ["Cluster E"]
+            },
+            {
+                id: 12,
+                name: "Smart Otoscope for Ear Infection Diagnosis",
+                problem: "Misdiagnosis of pediatric ear infections",
+                solution: "Smartphone otoscope with AI distinguishing bacterial from viral causes",
+                tam: "$220 M",
+                clusterNames: ["Cluster D"]
+            },
+            {
+                id: 13,
+                name: "Heart Failure Monitoring Platform",
+                problem: "Inefficient monitoring of heart failure patients",
+                solution: "Wearable patch combining multiple sensors to predict decompensation",
+                tam: "$10,000 M",
+                clusterNames: ["Cluster A", "Cluster C"]
+            },
+            {
+                id: 18,
+                name: "Objective Concussion Assessment",
+                problem: "Subjective assessment of concussion and recovery",
+                solution: "Portable device combining EEG, eye tracking with AI analysis",
+                tam: "$7,420 M",
+                clusterNames: ["Cluster H"]
+            },
+            {
+                id: 20,
+                name: "Intelligent CPAP System",
+                problem: "Inefficient CPAP titration for sleep apnea",
+                solution: "Smart CPAP device adjusting settings based on real-time patterns",
+                tam: "$9,700 M",
+                clusterNames: ["Cluster C"]
+            },
+            {
+                id: 22,
+                name: "Predictive Glucose Management System",
+                problem: "Challenging management of type 1 diabetes",
+                solution: "Closed-loop insulin delivery with AI predicting glucose trends",
+                tam: "$5,260 M",
+                clusterNames: ["Cluster C"]
+            },
+            {
+                id: 25,
+                name: "Inflammatory Bowel Disease Predictor",
+                problem: "Unpredictable flares in inflammatory bowel disease",
+                solution: "Ingestible sensor with AI predicting disease flares before symptoms",
+                tam: "$700 M",
+                clusterNames: ["Cluster G"]
+            },
+            {
+                id: 31,
+                name: "AI-Guided Rehabilitation System",
+                problem: "Limited real-time feedback in physical therapy",
+                solution: "Wearable sensors providing real-time feedback on exercise form",
+                tam: "$16,960 M",
+                clusterNames: ["Cluster F"]
+            },
+            {
+                id: 35,
+                name: "Personalized Neuromodulation for Pain",
+                problem: "Difficult management of chronic pain",
+                solution: "Wearable neuromodulation with AI learning individual pain patterns",
+                tam: "$7,400 M",
+                clusterNames: ["Cluster C"]
+            },
+            {
+                id: 41,
+                name: "Remote Neuropsychological Assessment",
+                problem: "Limited access to neuropsychological assessment",
+                solution: "Portable system providing comprehensive evaluation comparable to specialist testing",
+                tam: "$5,200 M",
+                clusterNames: ["Cluster H"]
+            }
+        ];
+        
+        // Add opportunities to nodes
+        opportunities.forEach(opp => {
+            // Determine color based on cluster (use the first cluster if multiple)
+            let color = "#FFFFFF"; // Default white for no cluster
+            if (opp.clusterNames.length > 0) {
+                color = clusterNames[opp.clusterNames[0]].color;
+            }
+            
+            // Add node
+            data.nodes.push({
+                id: `opp-${opp.id}`,
+                name: opp.name,
+                type: "opportunity",
+                problem: opp.problem,
+                solution: opp.solution,
+                tam: opp.tam,
+                value: 10,
+                color: color
+            });
+            
+            // Add links to clusters
+            opp.clusterNames.forEach(cluster => {
+                data.links.push({
+                    source: `opp-${opp.id}`,
+                    target: clusterNames[cluster].id,
+                    value: 1
+                });
+            });
+        });
+
+        // Create the visualization
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        // Create SVG
+        const svg = d3.select(".visualization")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+        
+        // Add zoom functionality
+        const zoom = d3.zoom()
+            .scaleExtent([0.2, 5])
+            .on("zoom", (event) => {
+                container.attr("transform", event.transform);
+            });
+        
+        svg.call(zoom);
+        
+        const container = svg.append("g");
+        
+        // Handle mobile vs desktop sizing
+        const isMobile = window.innerWidth < 768;
+        const nodeRadius = isMobile ? 15 : 10;
+        const linkDistance = isMobile ? 80 : 100;
+        const chargeStrength = isMobile ? -200 : -300;
+        
+        // Create simulation
+        const simulation = d3.forceSimulation(data.nodes)
+            .force("link", d3.forceLink(data.links).id(d => d.id).distance(linkDistance))
+            .force("charge", d3.forceManyBody().strength(chargeStrength))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collide", d3.forceCollide().radius(d => (d.type === "cluster" ? 20 : nodeRadius) * 1.5))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(height / 2).strength(0.05));
+        
+        // Create links
+        const link = container.append("g")
+            .selectAll("line")
+            .data(data.links)
+            .join("line")
+            .attr("class", "link")
+            .attr("stroke", d => {
+                const targetNode = data.nodes.find(node => node.id === d.target.id || node.id === d.target);
+                return targetNode ? targetNode.color : "#666";
+            })
+            .attr("stroke-width", d => Math.sqrt(d.value) * 2);
+        
+        // Create nodes
+        const node = container.append("g")
+            .selectAll(".node")
+            .data(data.nodes)
+            .join("g")
+            .attr("class", "node")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+        
+        // Add circles for nodes
+        node.append("circle")
+            .attr("r", d => d.type === "cluster" ? 20 : nodeRadius)
+            .attr("fill", d => d.color)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .attr("class", d => d.type === "cluster" ? "cluster-node hover-glow" : "hover-glow")
+            .on("click", showInfo);
+        
+        // Add text labels with mobile optimization
+        node.append("text")
+            .attr("dx", d => d.type === "cluster" ? 0 : (isMobile ? 16 : 12))
+            .attr("dy", d => d.type === "cluster" ? 0 : 4)
+            .attr("text-anchor", d => d.type === "cluster" ? "middle" : "start")
+            .text(d => {
+                // Shorter text on mobile
+                if (isMobile) {
+                    return d.name.length > 20 ? d.name.substring(0, 17) + "..." : d.name;
+                } else {
+                    return d.name.length > 30 ? d.name.substring(0, 27) + "..." : d.name;
+                }
+            })
+            .attr("font-size", d => d.type === "cluster" ? (isMobile ? 10 : 12) : (isMobile ? 8 : 10))
+            .attr("font-weight", d => d.type === "cluster" ? "bold" : "normal");
+        
+        // Update positions on tick
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+        
+        // Drag functions
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        // Info panel functions
+        function showInfo(event, d) {
+            const infoPanel = document.querySelector(".info-panel");
+            const infoTitle = document.querySelector(".info-title");
+            const infoContent = document.querySelector(".info-content");
+            
+            infoTitle.textContent = d.name;
+            
+            let content = "";
+            if (d.type === "cluster") {
+                content = `
+                    <p><strong>Type:</strong> Technology Platform</p>
+                    <p><strong>Description:</strong> ${d.description}</p>
+                    <p><strong>Market Opportunity:</strong> ${d.market}</p>
+                    <p>This cluster contains multiple healthcare innovation opportunities that leverage edge AI technology.</p>
+                `;
+            } else {
+                content = `
+                    <p><strong>Problem:</strong> ${d.problem}</p>
+                    <p><strong>Solution:</strong> ${d.solution}</p>
+                    <p><strong>Market Size (TAM):</strong> ${d.tam}</p>
+                `;
+            }
+            
+            infoContent.innerHTML = content;
+            infoPanel.classList.add("visible");
+            
+            // Highlight connected nodes and links
+            highlightConnections(d);
+        }
+        
+        // Hide info panel when clicking elsewhere
+        svg.on("click", function(event) {
+            if (event.target === this) {
+                document.querySelector(".info-panel").classList.remove("visible");
+                
+                // Reset highlighting
+                resetHighlights();
+            }
+        });
+        
+        // Close button for info panel (mobile friendly)
+        document.querySelector(".info-panel-close").addEventListener("click", function() {
+            document.querySelector(".info-panel").classList.remove("visible");
+            resetHighlights();
+        });
+        
+        // Function to highlight connections
+        function highlightConnections(d) {
+            resetHighlights();
+            
+            // Find all connected links and nodes
+            const connectedNodeIds = [d.id];
+            
+            // Find directly connected nodes through links
+            data.links.forEach(link => {
+                if (link.source.id === d.id) {
+                    connectedNodeIds.push(link.target.id);
+                } else if (link.target.id === d.id) {
+                    connectedNodeIds.push(link.source.id);
+                }
+            });
+            
+            // Dim all nodes and links
+            d3.selectAll(".link").style("opacity", 0.1);
+            node.selectAll("circle").style("opacity", 0.2);
+            node.selectAll("text").style("opacity", 0.2);
+            
+            // Highlight connected nodes and links
+            node.filter(node => connectedNodeIds.includes(node.id)).selectAll("circle").style("opacity", 1);
+            node.filter(node => connectedNodeIds.includes(node.id)).selectAll("text").style("opacity", 1);
+            
+            d3.selectAll(".link").filter(link => 
+                connectedNodeIds.includes(link.source.id) && connectedNodeIds.includes(link.target.id)
+            ).style("opacity", 1);
+        }
+        
+        // Reset highlights
+        function resetHighlights() {
+            d3.selectAll(".link").style("opacity", 0.5);
+            node.selectAll("circle").style("opacity", 1);
+            node.selectAll("text").style("opacity", 1);
+        }
+        
+        // Control buttons
+        document.getElementById("reset-zoom").addEventListener("click", function() {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity,
+                d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+            );
+        });
+        
+        document.getElementById("toggle-layout").addEventListener("click", function() {
+            simulation
+                .force("charge", d3.forceManyBody().strength(-300 * Math.random() * 2))
+                .alpha(1)
+                .restart();
+        });
+        
+        // Initial zoom to fit - different for mobile
+        const initialScale = isMobile ? 0.6 : 0.8;
+        const initialTranslateX = isMobile ? width / 3 : width / 5;
+        const initialTranslateY = isMobile ? height / 3 : height / 4;
+        const initialTransform = d3.zoomIdentity.scale(initialScale).translate(initialTranslateX, initialTranslateY);
+        svg.call(zoom.transform, initialTransform);
+        
+        // Add touch event listeners for mobile
+        if ('ontouchstart' in window) {
+            // Prevent zoom issues on mobile
+            document.addEventListener('touchmove', function(event) {
+                if (event.scale !== 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Double tap to reset view
+            let lastTap = 0;
+            svg.node().addEventListener('touchend', function(event) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 300 && tapLength > 0) {
+                    // Double tap detected
+                    svg.transition().duration(750).call(
+                        zoom.transform,
+                        d3.zoomIdentity.scale(initialScale).translate(initialTranslateX, initialTranslateY)
+                    );
+                }
+                lastTap = currentTime;
+            });
+        }
+    </script>
+</body>
+</html>
